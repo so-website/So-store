@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SO - Global Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans">
+    <!-- Header -->
+    <header class="border-b border-zinc-800 sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-black tracking-widest text-amber-400">S O</h1>
+            <div class="flex items-center space-x-4">
+                <% if (user) { %>
+                    <span class="text-sm text-zinc-400">Hi, <%= user %></span>
+                    <a href="/sell" class="bg-amber-400 text-zinc-950 px-4 py-2 rounded-full font-bold text-sm hover:bg-amber-300 transition">Sell Item</a>
+                    <a href="/logout" class="text-red-400 text-sm">Logout</a>
+                <% } else { %>
+                    <a href="/login" class="text-sm hover:text-amber-400 transition">Login</a>
+                    <a href="/register" class="bg-amber-400 text-zinc-950 px-4 py-2 rounded-full font-bold text-sm hover:bg-amber-300 transition">Sign Up</a>
+                <% } %>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-12 px-4 text-center bg-gradient-to-b from-zinc-900 to-zinc-950 border-b border-zinc-800">
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-4">Everything You Want, Delivered by <span class="text-amber-400">SO</span></h2>
+        <p class="text-zinc-400 max-w-xl mx-auto">Discover trending items, buy unique products from peer sellers, or launch your own store instantly.</p>
+    </section>
+
+    <!-- Product Grid -->
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        <h3 class="text-2xl font-bold mb-6 border-l-4 border-amber-400 pl-3">Trending Products</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% if (products.length === 0) { %>
+                <p class="text-zinc-500 col-span-full text-center py-10">No products listed yet. Be the first to sell!</p>
+            <% } else { %>
+                <% products.forEach(product => { %>
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-400/50 transition">
+                        <div>
+                            <img src="<%= product.image %>" alt="<%= product.title %>" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <h4 class="font-bold text-lg mb-1 truncate"><%= product.title %></h4>
+                                <p class="text-amber-400 font-extrabold text-xl mb-2">$<%= product.price.toFixed(2) %></p>
+                                <p class="text-zinc-400 text-sm line-clamp-2"><%= product.description %></p>
+                                <span class="text-xs text-zinc-500 mt-3 block">Seller: <%= product.seller %></span>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <button onclick="openCheckout(<%= product.id %>, '<%= product.title %>', <%= product.price %>)" class="w-full bg-zinc-800 hover:bg-amber-400 hover:text-zinc-950 py-2 rounded-xl font-bold transition text-sm">Buy Now</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </main>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl max-w-md w-full relative">
+            <button onclick="closeCheckout()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
+            <h3 class="text-xl font-bold mb-4 text-amber-400">Complete Your Order</h3>
+            <form action="/checkout" method="POST" class="space-y-4">
+                <input type="hidden" name="product_id" id="modalProductId">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Full Name</label>
+                    <input type="text" name="customer_name" required class="w-full bg-zinc-955 border border-zinc-800 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Delivery Address & Location</label>
+                    <input type="text" name="address" required class="w-full bg-zinc-955 border border-zinc-800 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Phone Number</label>
+                    <input type="text" name="phone" required class="w-full bg-zinc-955 border border-zinc-800 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Payment Method</label>
+                    <select name="payment_method" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-400">
+                        <option value="Bank Card">Bank Card (Credit/Debit)</option>
+                        <option value="Crypto">Crypto Currency (USDT/BTC)</option>
+                        <option value="COD">Cash on Delivery (COD)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-amber-400 text-zinc-950 py-3 rounded-xl font-bold hover:bg-amber-300 transition">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer / Customer Service -->
+    <footer class="border-t border-zinc-800 mt-20 py-8 bg-zinc-900 text-center text-zinc-400 text-sm">
+        <p class="mb-2">Need Help? Contact SO Customer Service:</p>
+        <p class="font-bold text-amber-400">Phone/WhatsApp: +96590018827</p>
+        <p class="font-bold text-amber-400">Email: othmensameh2@gmail.com</p>
+        <p class="text-xs text-zinc-600 mt-4">&copy; 2026 SO Platform. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function openCheckout(id, title, price) {
+            document.getElementById('modalProductId').value = id;
+            document.getElementById('checkoutModal').classList.remove('hidden');
+            document.getElementById('checkoutModal').classList.add('flex');
+        }
+        function closeCheckout() {
+            document.getElementById('checkoutModal').classList.remove('flex');
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
