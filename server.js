@@ -4,16 +4,19 @@ const bodyParser = require('body-parser');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Database Setup using Lowdb (JSON file storage)
-const adapter = new FileSync('db.json');
-const db = low(adapter);
+// Ensure database file exists securely
+const dbFile = path.join(__dirname, 'db.json');
+if (!fs.existsSync(dbFile)) {
+    fs.writeFileSync(dbFile, JSON.stringify({ users: [], products: [], orders: [] }));
+}
 
-// Set default data structure if db.json is empty
-db.defaults({ users: [], products: [], orders: [] }).write();
+const adapter = new FileSync(dbFile);
+const db = low(adapter);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,13 +27,19 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Set View Engine
+// Set View Engine and absolute views path
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
-    const products = db.get('products').value();
-    res.render('index', { products, user: req.session.user });
+    try {
+        const products = db.get('products').value() || [];
+        res.render('index', { products, user: req.session.user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Database loading error.");
+    }
 });
 
 app.get('/login', (req, res) => res.render('login'));
@@ -97,5 +106,5 @@ app.post('/checkout', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`SO Store is running smoothly at http://localhost:${PORT}`);
+    console.log(`SO Store is running smoothly on port ${PORT}`);
 });
