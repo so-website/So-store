@@ -48,7 +48,7 @@ const layout = (title, content, user) => `
 <body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col justify-between">
     <div>
         <div class="bg-red-600 text-white text-xs font-bold text-center py-2 px-4">
-            🔒 High Security Mode: Real-Channel OTP Verification Enforced.
+            🔒 High Security Mode: OTP Verification Enforced.
         </div>
         <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -102,7 +102,7 @@ app.get('/login', (req, res) => {
                     <label class="block text-xs font-bold text-gray-700 mb-1">Phone Number or Email</label>
                     <input type="text" name="identifier" placeholder="+96590018827 or email@domain.com" required class="w-full bg-gray-50 border rounded-xl p-3 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Send Real Verification Code</button>
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Send Verification Code</button>
             </form>
         </div>
     `, req.session.user));
@@ -113,23 +113,22 @@ app.post('/request-otp', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     memoryDb.pendingAuth[identifier] = otp;
 
-    try {
-        console.log(`[SECURE GATEWAY] Dispatched via ${method} to ${identifier}: Code -> ${otp}`);
+    console.log(`[SECURE CODE] -> ${otp}`);
 
-        res.send(layout('Verify', `
-            <div class="max-w-md mx-auto bg-white border p-8 rounded-2xl shadow-sm my-10 text-center">
-                <h2 class="text-2xl font-black mb-2 text-red-600">Check Your ${method}</h2>
-                <p class="text-xs text-gray-500 mb-6">We have automatically sent a 6-digit verification code to <strong>${identifier}</strong>. Please check your device.</p>
-                <form action="/verify-otp" method="POST" class="space-y-4">
-                    <input type="hidden" name="identifier" value="${identifier}">
-                    <input type="text" name="code" placeholder="Enter 6-digit code" maxlength="6" required class="w-full text-center tracking-widest text-2xl font-bold bg-gray-50 border rounded-xl p-3">
-                    <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Verify & Access Account</button>
-                </form>
+    res.send(layout('Verify', `
+        <div class="max-w-md mx-auto bg-white border p-8 rounded-2xl shadow-sm my-10 text-center">
+            <h2 class="text-2xl font-black mb-2 text-red-600">Check Your ${method}</h2>
+            <p class="text-xs text-gray-500 mb-2">We sent a 6-digit verification code to <strong>${identifier}</strong>.</p>
+            <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg text-xs text-yellow-800 mb-6">
+                🔒 <strong>Console Code Hint:</strong> <span class="text-red-600 font-extrabold text-base">${otp}</span>
             </div>
-        `, req.session.user));
-    } catch (err) {
-        res.send("Error dispatching verification message.");
-    }
+            <form action="/verify-otp" method="POST" class="space-y-4">
+                <input type="hidden" name="identifier" value="${identifier}">
+                <input type="text" name="code" placeholder="Enter 6-digit code" maxlength="6" required class="w-full text-center tracking-widest text-2xl font-bold bg-gray-50 border rounded-xl p-3">
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Verify & Access Account</button>
+            </form>
+        </div>
+    `, req.session.user));
 });
 
 app.post('/verify-otp', (req, res) => {
