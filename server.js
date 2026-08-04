@@ -1,22 +1,34 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Ensure database file exists securely
-const dbFile = path.join(__dirname, 'db.json');
-if (!fs.existsSync(dbFile)) {
-    fs.writeFileSync(dbFile, JSON.stringify({ users: [], products: [], orders: [] }));
-}
-
-const adapter = new FileSync(dbFile);
-const db = low(adapter);
+// In-Memory Database for Cloud Hosting
+const memoryDb = {
+    users: [],
+    products: [
+        {
+            id: 1,
+            title: "SO Signature Smart Watch",
+            price: 29.99,
+            description: "High-end fitness and notification tracker, sleek design.",
+            image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
+            seller: "admin"
+        },
+        {
+            id: 2,
+            title: "Wireless Neon Earbuds",
+            price: 19.99,
+            description: "Immersive sound with deep bass and long battery life.",
+            image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
+            seller: "admin"
+        }
+    ],
+    orders: []
+};
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -33,13 +45,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
-    try {
-        const products = db.get('products').value() || [];
-        res.render('index', { products, user: req.session.user });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Database loading error.");
-    }
+    res.render('index', { products: memoryDb.products, user: req.session.user });
 });
 
 app.get('/login', (req, res) => res.render('login'));
@@ -52,17 +58,17 @@ app.get('/sell', (req, res) => {
 // Auth Handlers
 app.post('/register', (req, res) => {
     const { username, password } = req.body;
-    const existingUser = db.get('users').find({ username }).value();
+    const existingUser = memoryDb.users.find(u => u.username === username);
     if (existingUser) {
         return res.send("Error: Username already exists. <a href='/register'>Try again</a>");
     }
-    db.get('users').push({ username, password }).write();
+    memoryDb.users.push({ username, password });
     res.redirect('/login');
 });
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    const user = db.get('users').find({ username, password }).value();
+    const user = memoryDb.users.find(u => u.username === username && u.password === password);
     if (user) {
         req.session.user = user.username;
         res.redirect('/');
@@ -79,28 +85,28 @@ app.get('/logout', (req, res) => {
 app.post('/add-product', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     const { title, price, description, image } = req.body;
-    db.get('products').push({
+    memoryDb.products.push({
         id: Date.now(),
         title,
         price: parseFloat(price),
         description,
         image,
         seller: req.session.user
-    }).write();
+    });
     res.redirect('/');
 });
 
 // Checkout Handler
 app.post('/checkout', (req, res) => {
     const { product_id, customer_name, address, phone, payment_method } = req.body;
-    db.get('orders').push({
+    memoryDb.orders.push({
         id: Date.now(),
         product_id,
         customer_name,
         address,
         phone,
         payment_method
-    }).write();
+    });
     
     res.send(`<h2>Order Placed Successfully! 🎉</h2><p>Thank you for shopping with <strong>SO</strong>. We will contact you shortly.</p><a href="/">Back to Home</a>`);
 });
