@@ -11,21 +11,18 @@ const memoryDb = {
     products: []
 };
 
-for (let i = 1; i <= 50; i++) {
+for (let i = 1; i <= 12; i++) {
     memoryDb.products.push({
         id: i,
         title: `Elite Luxury Signature Item #${i}`,
         price: parseFloat((Math.random() * 150 + 50).toFixed(2)),
         oldPrice: parseFloat((Math.random() * 300 + 200).toFixed(2)),
         discount: "VIP EXCLUSIVE",
-        // Panoramic landscape images (16:9 ratio)
         images: [
             `https://picsum.photos/seed/lux${i}a/800/450`,
             `https://picsum.photos/seed/lux${i}b/800/450`,
-            `https://picsum.photos/seed/lux${i}c/800/450`,
-            `https://picsum.photos/seed/lux${i}d/800/450`
+            `https://picsum.photos/seed/lux${i}c/800/450`
         ],
-        sales: `${Math.floor(Math.random() * 10 + 1)}K+ acquired`,
         seller: "SO Luxury Vault"
     });
 }
@@ -46,25 +43,40 @@ const layout = (title, content, user) => `
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title} - SO Luxury Collection</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Moving Live 3D Holographic Gold Logo Animation */
+        @keyframes float3d {
+            0% { transform: perspective(500px) rotateX(0deg) rotateY(0deg) translateY(0px); text-shadow: 0 5px 15px rgba(245,158,11,0.4); }
+            50% { transform: perspective(500px) rotateX(8deg) rotateY(-12deg) translateY(-4px); text-shadow: 5px 10px 20px rgba(245,158,11,0.7), -5px -2px 5px rgba(0,0,0,0.9); }
+            100% { transform: perspective(500px) rotateX(0deg) rotateY(0deg) translateY(0px); text-shadow: 0 5px 15px rgba(245,158,11,0.4); }
+        }
+        .live-3d-logo {
+            animation: float3d 4s ease-in-out infinite;
+            transform-style: preserve-3d;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body class="bg-[#0b0b0b] text-gray-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
     <div>
-        <!-- Panoramic Luxurious Gold Header & Web Logo -->
+        <!-- Panoramic Luxurious Gold Header & Live 3D Logo -->
         <div class="w-full bg-gradient-to-r from-black via-[#141414] to-black py-5 px-6 shadow-2xl border-b border-amber-500/30">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="/" class="flex items-center space-x-4 group">
-                    <div class="bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 text-black font-black tracking-widest px-5 py-2.5 rounded-xl text-xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition">SO</div>
+                    <!-- Moving Live 3D Logo Badge -->
+                    <div class="live-3d-logo bg-gradient-to-tr from-amber-600 via-yellow-300 to-amber-200 text-black font-black tracking-widest px-5 py-2.5 rounded-xl text-xl shadow-xl border border-amber-300/40">SO</div>
                     <div>
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 font-black tracking-wider text-xl uppercase block leading-none">SO LUXURY VAULT</span>
                         <span class="text-amber-500/70 text-[10px] tracking-[0.3em] uppercase font-semibold">Kuwait • Exclusive Private Club</span>
                     </div>
                 </a>
-                <div class="flex items-center space-x-6">
-                    <button onclick="toggleCart()" class="relative bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black px-6 py-2.5 rounded-full font-black text-xs flex items-center space-x-2 shadow-lg shadow-amber-600/20 transition">
+                <div class="flex items-center space-x-4">
+                    <a href="/sell" class="bg-[#1f1f1f] border border-amber-500/50 hover:bg-amber-500 hover:text-black text-amber-400 px-4 py-2.5 rounded-full text-xs font-black transition shadow">＋ Sell Product</a>
+                    <button onclick="toggleCart()" class="relative bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black px-5 py-2.5 rounded-full font-black text-xs flex items-center space-x-2 shadow-lg shadow-amber-600/20 transition">
                         <span>🛒 Basket</span>
                         <span id="cart-badge" class="bg-black text-amber-400 px-2 py-0.5 rounded-full text-xs font-black">0</span>
                     </button>
-                    ${user ? `<span class="font-bold text-sm text-amber-300 hidden md:inline">${user}</span><a href="/logout" class="text-gray-400 hover:text-amber-400 text-sm font-medium transition">Logout</a>` : `<a href="/login" class="bg-[#1f1f1f] border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-black px-5 py-2.5 rounded-full text-xs font-bold transition">Sign In</a>`}
+                    ${user ? `<span class="font-bold text-sm text-amber-300 hidden md:inline">${user}</span><a href="/logout" class="text-gray-400 hover:text-amber-400 text-sm font-medium transition">Logout</a>` : `<a href="/login" class="bg-[#1f1f1f] border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-black px-4 py-2.5 rounded-full text-xs font-bold transition">Sign In</a>`}
                 </div>
             </div>
         </div>
@@ -209,7 +221,7 @@ app.get('/', (req, res) => {
     let productsHtml = memoryDb.products.map(p => `
         <div class="bg-[#141414] border border-gray-800 hover:border-amber-500/50 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group transition duration-300">
             <div class="relative bg-black">
-                <span class="absolute top-3 left-3 bg-gradient-to-r from-amber-600 to-yellow-500 text-black text-[10px] font-black px-2.5 py-1 rounded-full z-10 shadow">${p.discount}</span>
+                <span class="absolute top-3 left-3 bg-gradient-to-r from-amber-600 to-yellow-500 text-black text-[10px] font-black px-2.5 py-1 rounded-full z-10 shadow">${p.discount || 'VERIFIED'}</span>
                 <!-- Panoramic 16:9 Image Container -->
                 <img id="img-${p.id}" src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-500">
                 <div class="flex justify-center space-x-1.5 p-2 bg-[#1a1a1a] border-t border-gray-800">
@@ -218,10 +230,11 @@ app.get('/', (req, res) => {
             </div>
             <div class="p-5 flex-1 flex flex-col justify-between">
                 <div>
-                    <h4 class="font-bold text-sm mb-2 text-gray-200 line-clamp-2">${p.title}</h4>
+                    <h4 class="font-bold text-sm mb-1 text-gray-200 line-clamp-2">${p.title}</h4>
+                    <p class="text-xs text-gray-400 mb-3 line-clamp-2">${p.description || 'Exclusive luxury item listed on SO Vault.'}</p>
                     <div class="flex items-baseline space-x-2 mb-4">
                         <span class="text-amber-400 font-black text-lg">$${p.price}</span>
-                        <span class="text-gray-500 text-xs line-through">$${p.oldPrice}</span>
+                        ${p.oldPrice ? `<span class="text-gray-500 text-xs line-through">$${p.oldPrice}</span>` : ''}
                     </div>
                 </div>
                 <button onclick="addToCart(${p.id}, '${p.title.replace(/'/g, "\\'")}', ${p.price}, '${p.images[0]}')" class="w-full bg-[#1f1f1f] border border-amber-500/40 group-hover:bg-gradient-to-r group-hover:from-amber-600 group-hover:to-yellow-500 text-amber-400 group-hover:text-black font-black py-2.5 rounded-xl text-xs transition duration-300 shadow">Acquire to Basket</button>
@@ -229,6 +242,56 @@ app.get('/', (req, res) => {
         </div>
     `).join('');
     res.send(layout('Home', `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">${productsHtml}</div>`, req.session.user));
+});
+
+app.get('/sell', (req, res) => {
+    res.send(layout('List Item', `
+        <div class="max-w-xl mx-auto bg-[#141414] border border-amber-500/40 p-8 rounded-2xl shadow-2xl my-6">
+            <h2 class="text-2xl font-black mb-2 text-amber-400 text-center">List Your Item for Sale</h2>
+            <p class="text-xs text-gray-400 text-center mb-6">Publish your luxury product instantly to the SO Global Vault.</p>
+            <form action="/sell" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-amber-400 mb-1 uppercase tracking-wider">Product Title</label>
+                    <input type="text" name="title" placeholder="e.g., Limited Edition Luxury Watch" required class="w-full bg-[#1c1c1c] border border-gray-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-400 mb-1 uppercase tracking-wider">Price ($ USD)</label>
+                        <input type="number" step="0.01" name="price" placeholder="299.99" required class="w-full bg-[#1c1c1c] border border-gray-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-400 mb-1 uppercase tracking-wider">Original Price (Optional)</label>
+                        <input type="number" step="0.01" name="oldPrice" placeholder="499.99" class="w-full bg-[#1c1c1c] border border-gray-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-400 mb-1 uppercase tracking-wider">Panoramic Image URL (16:9)</label>
+                    <input type="url" name="image" placeholder="https://images.unsplash.com/..." required class="w-full bg-[#1c1c1c] border border-gray-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-400 mb-1 uppercase tracking-wider">Detailed Description & Specifications</label>
+                    <textarea name="description" rows="4" placeholder="Describe your item's condition, features, authenticity..." required class="w-full bg-[#1c1c1c] border border-gray-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black py-3 rounded-xl font-black text-sm shadow-lg shadow-amber-600/20 transition">Publish to SO Vault</button>
+            </form>
+        </div>
+    `, req.session.user));
+});
+
+app.post('/sell', (req, res) => {
+    const { title, price, oldPrice, image, description } = req.body;
+    const newProduct = {
+        id: memoryDb.products.length + 1,
+        title,
+        price: parseFloat(price),
+        oldPrice: oldPrice ? parseFloat(oldPrice) : null,
+        discount: "USER LISTED",
+        images: [image, image, image],
+        description,
+        seller: req.session.user || 'Verified Member'
+    };
+    memoryDb.products.unshift(newProduct);
+    res.redirect('/');
 });
 
 app.get('/login', (req, res) => {
